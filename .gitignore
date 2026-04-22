@@ -1,1 +1,6 @@
-
+__pycache__/
+*.pyc
+.env
+data/
+uploads_cortes/
+cortes_app.db
