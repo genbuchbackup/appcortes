@@ -143,6 +143,11 @@ def update_status(corte_id: int, status: str) -> None:
 # =========================================================
 # ROUTES
 # =========================================================
+@app.route("/")
+def index():
+    rows = fetch_all_cortes()
+    return render_template_string(INDEX_HTML, rows=rows)
+
 @app.route("/subir", methods=["GET", "POST"])
 def subir_corte():
     if request.method == "POST":
