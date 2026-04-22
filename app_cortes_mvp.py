@@ -352,10 +352,10 @@ SUBIR_HTML = """
       <textarea name="observaciones" rows="3" placeholder="Opcional"></textarea>
 
       <label>Imagen 1</label>
-      <input type="file" name="imagen_1" accept="image/*" capture="environment">
+      <input type="file" name="imagen_1" accept="image/*">
 
       <label>Imagen 2 (opcional)</label>
-      <input type="file" name="imagen_2" accept="image/*" capture="environment">
+      <input type="file" name="imagen_2" accept="image/*">
 
       <button type="submit">Guardar corte</button>
     </form>
