@@ -48,7 +48,7 @@ AYER = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 SUCURSALES = [
     {"id": 1, "nombre": "Generales Revolución", "alias": ["revolucion", "generales revolucion"]},
     {"id": 2, "nombre": "Generales Galerías", "alias": ["galerias", "generales galerias"]},
-    {"id": 3, "nombre": "Generales Linda Vista", "alias": ["linda vista", "generales linda vista", "GRLV"]},
+    {"id": 3, "nombre": "Generales Linda Vista", "alias": ["linda vista", "generales linda vista", "grlv"]},
     {"id": 4, "nombre": "Generales Barragán", "alias": ["barragan", "generales barragan"]},
     {"id": 5, "nombre": "Generales Santa Catarina", "alias": ["santa catarina", "generales santa catarina"]},
     {"id": 6, "nombre": "Casona Linda Vista", "alias": ["casona linda vista"]},
