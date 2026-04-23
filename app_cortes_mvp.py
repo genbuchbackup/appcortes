@@ -152,72 +152,53 @@ def index():
 def subir_corte():
     if request.method == "POST":
         print("POST /subir recibido", flush=True)
-
-        sucursal = (request.form.get("sucursal") or "").strip().upper()
-        fecha = (request.form.get("fecha") or "").strip()
-        turno = (request.form.get("turno") or "").strip()
-        cajera = (request.form.get("cajera") or "").strip()
-        observaciones = (request.form.get("observaciones") or "").strip()
-
-        print("Datos leídos:", sucursal, fecha, turno, cajera, flush=True)
-
-        if not sucursal or not fecha or not turno:
-            print("Faltan campos obligatorios", flush=True)
-            flash("Sucursal, fecha y turno son obligatorios.", "danger")
-            return redirect(url_for("subir_corte"))
-
         try:
-            print("Antes de guardar img1", flush=True)
-            img1 = save_uploaded_file(request.files.get("imagen_1"), sucursal, fecha, turno, 1)
-            print("Después de guardar img1:", img1, flush=True)
+            print("Antes de parsear form", flush=True)
 
-            print("Antes de guardar img2", flush=True)
-            img2 = save_uploaded_file(request.files.get("imagen_2"), sucursal, fecha, turno, 2)
-            print("Después de guardar img2:", img2, flush=True)
-        except ValueError as e:
-            print("Error de validación archivo:", str(e), flush=True)
-            flash(str(e), "danger")
-            return redirect(url_for("subir_corte"))
+            form = request.form
+            files = request.files
+
+            print("Después de parsear form", flush=True)
+
+            sucursal = (form.get("sucursal") or "").strip().upper()
+            fecha = (form.get("fecha") or "").strip()
+            turno = (form.get("turno") or "").strip()
+            cajera = (form.get("cajera") or "").strip()
+            observaciones = (form.get("observaciones") or "").strip()
+
+            print("Datos:", sucursal, fecha, turno, cajera, flush=True)
+            print("Archivos:", list(files.keys()), flush=True)
+
+            img1 = save_uploaded_file(files.get("imagen_1"), sucursal, fecha, turno, 1)
+            img2 = save_uploaded_file(files.get("imagen_2"), sucursal, fecha, turno, 2)
+
+            db = get_db()
+            db.execute(
+                """
+                INSERT INTO cortes_subidos (
+                    sucursal, fecha, turno, cajera, observaciones,
+                    imagen_1, imagen_2, status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente', ?)
+                """,
+                (
+                    sucursal,
+                    fecha,
+                    turno,
+                    cajera,
+                    observaciones,
+                    img1,
+                    img2,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                ),
+            )
+            db.commit()
+
+            flash("Corte guardado correctamente.", "success")
+            return redirect(url_for("index"))
+
         except Exception as e:
-            print("Error guardando archivos:", repr(e), flush=True)
-            raise
-
-        if not img1 and not img2:
-            print("No se subió ninguna imagen", flush=True)
-            flash("Debes subir al menos una imagen.", "danger")
-            return redirect(url_for("subir_corte"))
-
-        print("Antes de get_db()", flush=True)
-        db = get_db()
-        print("Después de get_db()", flush=True)
-
-        print("Antes de INSERT", flush=True)
-        db.execute(
-            """
-            INSERT INTO cortes_subidos (
-                sucursal, fecha, turno, cajera, observaciones,
-                imagen_1, imagen_2, status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente', ?)
-            """,
-            (
-                sucursal,
-                fecha,
-                turno,
-                cajera,
-                observaciones,
-                img1,
-                img2,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            ),
-        )
-        print("Después de INSERT", flush=True)
-
-        print("Antes de COMMIT", flush=True)
-        db.commit()
-        print("Después de COMMIT", flush=True)
-
-        flash("Corte guardado correctamente.", "success")
-        return redirect(url_for("index"))
+            print("ERROR EN /subir:", repr(e), flush=True)
+            return f"Error interno en /subir: {repr(e)}", 500
 
     return render_template_string(SUBIR_HTML)
 
@@ -330,7 +311,7 @@ SUBIR_HTML = """
 <body>
   <div class="box">
     <h2>Subir corte</h2>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" action="/subir" enctype="multipart/form-data">
       <label>Sucursal</label>
       <input type="text" name="sucursal" placeholder="Ej. GRLV" required>
 
